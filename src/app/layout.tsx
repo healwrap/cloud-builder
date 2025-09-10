@@ -1,11 +1,12 @@
 import { type Metadata } from "next";
 import {
 	ClerkProvider,
-	SignInButton,
-	SignUpButton,
-	SignedIn,
-	SignedOut,
-	UserButton,
+	// 以下组件已注释掉，因为它们当前未被使用
+	// SignInButton,
+	// SignUpButton,
+	// SignedIn,
+	// SignedOut,
+	// UserButton,
 } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";

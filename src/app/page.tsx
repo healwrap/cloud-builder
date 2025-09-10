@@ -5,7 +5,8 @@ import GradientBlinds from "@/components/GradientBlinds";
 import BlurText from "@/components/BlurText";
 import MagicBento from "@/components/MagicBento";
 import Navbar from "@/components/Navbar";
-import { StaggeredMenu } from "@/components/StaggeredMenu";
+// 注释掉未使用的导入
+// import { StaggeredMenu } from "@/components/StaggeredMenu";
 
 export default function Home() {
 	return (

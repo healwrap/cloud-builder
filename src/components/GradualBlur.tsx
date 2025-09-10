@@ -115,7 +115,7 @@ const getGradientDirection = (position: string): string => {
   return directions[position] || 'to bottom';
 };
 
-const debounce = <T extends (...a: any[]) => void>(fn: T, wait: number) => {
+const debounce = <T extends (...a: unknown[]) => void>(fn: T, wait: number) => {
   let t: ReturnType<typeof setTimeout>;
   return (...a: Parameters<T>) => {
     clearTimeout(t);
@@ -127,17 +127,25 @@ const useResponsiveDimension = (
   config: Partial<GradualBlurProps>,
   key: keyof GradualBlurProps
 ) => {
-  const [val, setVal] = useState<any>(config[key]);
+  // 使用具体的类型而不是unknown
+  const [val, setVal] = useState<string | number | undefined>(config[key] as string | number | undefined);
   useEffect(() => {
     if (!responsive) return;
     const calc = () => {
       const w = window.innerWidth;
-      let v: any = config[key];
+      let v: string | number | undefined = config[key] as string | number | undefined;
       const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
       const k = cap(key as string);
-      if (w <= 480 && (config as any)['mobile' + k]) v = (config as any)['mobile' + k];
-      else if (w <= 768 && (config as any)['tablet' + k]) v = (config as any)['tablet' + k];
-      else if (w <= 1024 && (config as any)['desktop' + k]) v = (config as any)['desktop' + k];
+      
+      type ResponsiveConfig = Partial<GradualBlurProps> & {
+        [key: string]: string | number | undefined;
+      };
+      
+      const typedConfig = config as ResponsiveConfig;
+      
+      if (w <= 480 && typedConfig['mobile' + k]) v = typedConfig['mobile' + k];
+      else if (w <= 768 && typedConfig['tablet' + k]) v = typedConfig['tablet' + k];
+      else if (w <= 1024 && typedConfig['desktop' + k]) v = typedConfig['desktop' + k];
       setVal(v);
     };
     const deb = debounce(calc, 100);
@@ -145,7 +153,7 @@ const useResponsiveDimension = (
     window.addEventListener('resize', deb);
     return () => window.removeEventListener('resize', deb);
   }, [responsive, config, key]);
-  return responsive ? val : (config as any)[key];
+  return responsive ? val : (config as Record<keyof GradualBlurProps, string | number | undefined>)[key];
 };
 
 const useIntersectionObserver = (ref: React.RefObject<HTMLDivElement>, shouldObserve: boolean = false) => {
@@ -255,10 +263,12 @@ const GradualBlur: React.FC<GradualBlurProps> = props => {
     return baseStyle;
   }, [config, responsiveHeight, responsiveWidth, isVisible]);
 
-  const { hoverIntensity, animated, onAnimationComplete, duration } = config as any;
+  const { hoverIntensity, animated, onAnimationComplete, duration } = config as Partial<GradualBlurProps>;
   useEffect(() => {
     if (isVisible && animated === 'scroll' && onAnimationComplete) {
-      const t = setTimeout(() => onAnimationComplete(), parseFloat(duration) * 1000);
+      // 确保duration有值，并提供默认值
+      const parsedDuration = duration ? parseFloat(duration) : 300;
+      const t = setTimeout(() => onAnimationComplete(), parsedDuration);
       return () => clearTimeout(t);
     }
   }, [isVisible, animated, onAnimationComplete, duration]);
@@ -279,8 +289,14 @@ const GradualBlur: React.FC<GradualBlurProps> = props => {
 
 const GradualBlurMemo = React.memo(GradualBlur);
 GradualBlurMemo.displayName = 'GradualBlur';
-(GradualBlurMemo as any).PRESETS = PRESETS;
-(GradualBlurMemo as any).CURVE_FUNCTIONS = CURVE_FUNCTIONS;
+// 使用类型扩展来避免any
+type ExtendedGradualBlurMemo = typeof GradualBlurMemo & {
+  PRESETS: typeof PRESETS;
+  CURVE_FUNCTIONS: typeof CURVE_FUNCTIONS;
+};
+
+(GradualBlurMemo as ExtendedGradualBlurMemo).PRESETS = PRESETS;
+(GradualBlurMemo as ExtendedGradualBlurMemo).CURVE_FUNCTIONS = CURVE_FUNCTIONS;
 export default GradualBlurMemo;
 
 const injectStyles = () => {

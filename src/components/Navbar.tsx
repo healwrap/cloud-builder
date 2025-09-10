@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Menu, X } from "lucide-react";
-import Image from "next/image";
+import React from "react";
+// 注释掉未使用的导入
+// import { Menu, X } from "lucide-react";
+// import Image from "next/image";
 import GradualBlurMemo from "./GradualBlur";
 
 interface NavItem {
@@ -9,17 +10,20 @@ interface NavItem {
 }
 
 export default function Navbar({
-	logoUrl,
-	items,
+	// 注释掉未使用的参数
+	// logoUrl,
+	// items,
 }: {
 	logoUrl: string;
 	items: NavItem[];
 }) {
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	// 注释掉未使用的状态
+	// const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-	const toggleMenu = () => {
-		setIsMenuOpen(!isMenuOpen);
-	};
+	// 注释掉未使用的函数
+	// const toggleMenu = () => {
+	// 	setIsMenuOpen(!isMenuOpen);
+	// };
 
 	return (
 		<nav className="w-full">
