@@ -225,7 +225,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
 		openTlRef.current = tl;
 		return tl;
-	// 不需要使用position依赖
+		// 不需要使用position依赖
 	}, []);
 
 	// 移除position依赖，修复react-hooks/exhaustive-deps警告
@@ -414,7 +414,9 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 				}
 				style={
 					accentColor
-						? ({ ["--sm-accent" as string]: accentColor } as React.CSSProperties)
+						? ({
+								["--sm-accent" as string]: accentColor,
+						  } as React.CSSProperties)
 						: undefined
 				}
 				data-position={position}
@@ -455,13 +457,13 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 					>
 						{/* 替换img标签为next/image以修复Next.js警告 */}
 						<Image
-								src={logoUrl}
-								alt="Logo"
-								className="sm-logo-img block h-8 w-auto object-contain"
-								draggable={false}
-								width={110}
-								height={24}
-							/>
+							src={logoUrl}
+							alt="Logo"
+							className="sm-logo-img block h-8 w-auto object-contain"
+							draggable={false}
+							width={110}
+							height={24}
+						/>
 					</div>
 
 					<button

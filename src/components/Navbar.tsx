@@ -9,11 +9,10 @@ interface NavItem {
 	href: string;
 }
 
-export default function Navbar({
-	// 注释掉未使用的参数
-	// logoUrl,
-	// items,
-}: {
+export default function Navbar({}: // 注释掉未使用的参数
+// logoUrl,
+// items,
+{
 	logoUrl: string;
 	items: NavItem[];
 }) {
@@ -27,7 +26,6 @@ export default function Navbar({
 
 	return (
 		<nav className="w-full">
-
 			<GradualBlurMemo
 				className="!fixed top-0 z-0"
 				target="parent"
