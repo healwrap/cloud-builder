@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "allotment/dist/style.css"
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -26,8 +27,8 @@ export default function RootLayout({
 	return (
 		<ClerkProvider 
 			publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-			afterSignInUrl="/dashboard"
-			afterSignUpUrl="/dashboard"
+			signInFallbackRedirectUrl="/dashboard"
+			signUpFallbackRedirectUrl="/dashboard"
 		>
 			<html lang="zh-CN">
 				<body

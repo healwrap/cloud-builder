@@ -83,12 +83,12 @@ const AuthNavigation: React.FC<AuthNavigationProps> = ({
   // 未登录用户的移动端按钮
   const signedOutMobileButtons = (
     <>
-      <SignInButton mode="modal">
+      <SignInButton mode="redirect">
         <button className="w-full h-12 rounded-full border border-gray-700 text-white px-8 mb-4">
           登录
         </button>
       </SignInButton>
-      <SignUpButton mode="modal">
+      <SignUpButton mode="redirect">
         <button className="w-full h-12 rounded-full bg-white px-8 text-base font-medium text-black hover:bg-white/90">
           免费注册
         </button>
@@ -98,7 +98,7 @@ const AuthNavigation: React.FC<AuthNavigationProps> = ({
 
   return (
     <nav className={className}>
-      <Logo />
+      <Logo mode="dark"/>
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex items-center space-x-6">

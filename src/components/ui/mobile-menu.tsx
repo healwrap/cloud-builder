@@ -50,7 +50,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             className="fixed inset-0 z-50 flex flex-col p-4 bg-black/95 md:hidden"
           >
             <div className="flex items-center justify-between">
-              <Logo />
+              <Logo mode="dark"/>
               <button onClick={onToggle}>
                 <X className="h-6 w-6 text-white" />
               </button>
