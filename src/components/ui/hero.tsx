@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { AuthNavigation } from "./auth-navigation";
+import { Navigation } from "./navigation";
 import { Badge } from "./badge";
-import { AuthHeroContent } from "./auth-hero-content";
+import { HeroContent } from "./hero-content";
 
-const AuthHero = () => {
+const Hero = () => {
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Gradient background with grain effect */}
@@ -19,16 +19,16 @@ const AuthHero = () => {
       {/* Content container */}
       <div className="relative z-10">
         {/* Navigation */}
-        <AuthNavigation />
+        <Navigation />
 
         {/* Badge */}
         <Badge text="体验下一代低代码开发平台！" />
 
         {/* Hero section */}
-        <AuthHeroContent />
+        <HeroContent />
       </div>
     </div>
   );
 };
 
-export { AuthHero };
+export { Hero };
