@@ -2,6 +2,7 @@ import { getObjectById } from "@/lib/utils";
 import { CSSProperties } from "react";
 import { create } from "zustand";
 import { ComponentName } from "./component-config";
+import { nanoid } from "nanoid";
 
 export interface Component {
 	id: string;
@@ -10,14 +11,19 @@ export interface Component {
 	styles?: CSSProperties;
 	desc: string;
 	children?: Component[];
-	parentId?: string;
+	parentId?: string | null;
 }
 
 interface ComponentStore {
 	components: Component[];
-	addComponent: (component: Component, parentId?: string) => void;
+	activeComponent: Component | null;
+	hoverComponent: Component | null;
+	addComponent: (component: Component, parentId?: string | null) => void;
 	deleteComponent: (id: string) => void;
 	updateComponent: (id: string, newProps: Record<string, unknown>) => void;
+	searchComponent: (id: string) => Component | undefined;
+	setActiveComponent: (component?: Component) => void;
+	setHoverComponent: (component?: Component) => void;
 }
 
 /**
@@ -26,12 +32,14 @@ interface ComponentStore {
 const useComponentStore = create<ComponentStore>((set, get) => ({
 	components: [
 		{
-			id: "1",
+			id: nanoid(10),
 			name: "Page",
 			props: {},
 			desc: "页面",
 		},
 	],
+	activeComponent: null,
+	hoverComponent: null,
 	addComponent: (component) => {
 		set((state) => {
 			const parentId = component.parentId;
@@ -85,6 +93,17 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 			components: [...state.components],
 		}));
 	},
+	searchComponent: (id) => {
+		return getObjectById<Component>(get().components, id);
+	},
+	setActiveComponent: (component) =>
+		set(() => ({
+			activeComponent: component,
+		})),
+	setHoverComponent: (component) =>
+		set(() => ({
+			hoverComponent: component,
+		})),
 }));
 
 export default useComponentStore;

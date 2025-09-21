@@ -1,3 +1,4 @@
+import useMaterialDrop from "@/hooks/useMaterialDrop";
 import React, { PropsWithChildren, ReactNode } from "react";
 
 interface ContainerProps {
@@ -5,9 +6,15 @@ interface ContainerProps {
 }
 
 export default function Container(props: ContainerProps) {
+	const { isOver, dropRef } = useMaterialDrop({
+		accept: ["Button", "Container"],
+	});
 	return (
 		<div
-			className="container mx-auto px-4 border border-b-fuchsia-400"
+			ref={dropRef}
+			className={`container mx-auto p-4  ${
+				isOver ? "border-2 border-blue-300" : "border-1 border-black"
+			}`}
 			{...props}
 		>
 			{props.children}

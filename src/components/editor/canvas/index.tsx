@@ -1,11 +1,11 @@
+import useMaterialDrop from "@/hooks/useMaterialDrop";
 import useComponentStore, { Component } from "@/stores/component";
 import useComponentConfigStore, {
 	ComponentConfigStore,
-	ComponentName,
 } from "@/stores/component-config";
-import React, { useEffect, useRef } from "react";
-import { useDrop } from "react-dnd";
-import { nanoid } from "nanoid";
+import React, { useState, useRef } from "react";
+import HoverMask from "../hover-mask";
+import useClickOutside from "@/hooks/useClickOutside";
 
 /**
  * 将JSON树渲染为组件
@@ -23,6 +23,8 @@ function renderComponent(
 		if (!compConfig || !compConfig.component) return null;
 		const props = {
 			key: comp.id,
+			// 传递一个data属性，方便后续查找
+			"data-component-id": comp.id,
 			name: comp.name,
 			styles: comp.styles,
 			...compConfig.defaultProps,
@@ -39,40 +41,95 @@ function renderComponent(
 
 export default function Canvas() {
 	const { componentConfig } = useComponentConfigStore();
-	const { components, addComponent } = useComponentStore();
-	const dropRef = useRef<HTMLDivElement>(null);
-	const [{ isOver }, drop] = useDrop(() => ({
-		accept: ["Button", "Container"],
-		drop: (item: { type: ComponentName }) => {
-			// 在此处理拖拽放置逻辑
-			console.log("Item dropped:", item);
-			addComponent({
-				id: nanoid(10),
-				name: item.type,
-				desc: componentConfig[item.type]?.desc || "",
-				props: componentConfig[item.type]?.defaultProps || {},
-				parentId: "1",
-			});
-		},
-		collect: (monitor) => ({
-			isOver: !!monitor.isOver(),
-		}),
-	}));
+	const {
+		components,
+		activeComponent,
+		hoverComponent,
+		searchComponent,
+		setActiveComponent,
+		setHoverComponent,
+		deleteComponent,
+	} = useComponentStore();
+	const [position, setPosition] = useState<DOMRect | null>(null);
+	const tagRef = useRef<HTMLDivElement>(null);
 
-	// 将 drop 函数应用到 ref 上
-	useEffect(() => {
-		drop(dropRef);
-	}, [drop]);
+	function handleMouseOver(e: React.MouseEvent) {
+		const composedPath = e.nativeEvent.composedPath();
+		for (const element of composedPath) {
+			if (
+				element instanceof HTMLElement &&
+				element.hasAttribute("data-component-id")
+			) {
+				const id = element.getAttribute("data-component-id");
+				const comp = searchComponent(id!);
+				setHoverComponent(comp);
+				// updatePosition(element);
+				break;
+			}
+		}
+	}
+
+	function handleMouseLeave() {
+		setHoverComponent(undefined);
+	}
+
+	const handleClick: React.MouseEventHandler = (e) => {
+		const composedPath = e.nativeEvent.composedPath();
+		for (const element of composedPath) {
+			if (
+				element instanceof HTMLElement &&
+				element.hasAttribute("data-component-id")
+			) {
+				const id = element.getAttribute("data-component-id");
+				const comp = searchComponent(id!);
+				setActiveComponent(comp);
+				updatePosition(element);
+				break;
+			}
+		}
+	};
+
+	const canvasRef = useClickOutside(() => {
+		setActiveComponent(undefined);
+		setHoverComponent(undefined);
+	}, [tagRef]);
+
+	function updatePosition(element: HTMLElement) {
+		if (!element) return;
+		const rect = element.getBoundingClientRect();
+		setPosition(rect);
+	}
+
+	const handleDeleteComponent = (component: Component) => {
+		if (component && component.id) {
+			deleteComponent(component.id);
+			setActiveComponent(undefined);
+		}
+	};
 
 	return (
-		<div
-			ref={dropRef}
-			className={`${
-				isOver ? "border-2 border-blue-300" : "border-2 border-transparent"
-			} h-full overflow-auto`}
-		>
-			<pre className="h-[50%] overflow-auto">{JSON.stringify(components, null, 2)}</pre>
-			<div>{renderComponent(components, componentConfig)}</div>
+		<div className="h-full overflow-auto">
+			{}
+			<div
+				ref={canvasRef}
+				className="canvas h-full"
+				onMouseOver={(e) => handleMouseOver(e)}
+				onMouseLeave={() => handleMouseLeave()}
+				onClick={handleClick}
+			>
+				{renderComponent(components, componentConfig)}
+			</div>
+			{/* {hoverComponent && (
+				<HoverMask position={position} hoverComponent={hoverComponent} />
+			)} */}
+			{activeComponent && (
+				<HoverMask
+					position={position}
+					hoverComponent={activeComponent}
+					tagRef={tagRef}
+					onDelete={handleDeleteComponent}
+				/>
+			)}
 		</div>
 	);
 }
