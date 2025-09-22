@@ -1,21 +1,24 @@
 import { Component } from "@/stores/component";
-import { Trash2 } from "lucide-react";
+import { ClosedCaption, Trash2, X } from "lucide-react";
 import React from "react";
 import { createPortal } from "react-dom";
+import { Popconfirm } from "antd";
 
-interface HoverMaskProps {
+interface MaskProps {
 	position: DOMRect | null;
 	hoverComponent: Component;
 	tagRef?: React.RefObject<HTMLDivElement | null>;
 	onDelete?: (component: Component) => void;
+	onClose?: () => void;
 }
 
-export default function HoverMask({
+export default function Mask({
 	position,
 	hoverComponent,
 	tagRef,
 	onDelete,
-}: HoverMaskProps) {
+	onClose,
+}: MaskProps) {
 	if (!position) return null;
 	const { top, left, width, height } = position;
 	const tagWidth = 90; // 增加宽度以适应删除按钮
@@ -39,18 +42,38 @@ export default function HoverMask({
 					backgroundColor: "blue",
 				}}
 			>
-				<span>{hoverComponent.name}</span>
-				{onDelete && (
-					<button
-						onClick={(e) => {
-							e.stopPropagation();
-							onDelete(hoverComponent);
-						}}
-						className="transition-colors ml-1 cursor-pointer"
-					>
-						<Trash2 size={14} />
-					</button>
-				)}
+				<span>{hoverComponent.desc}</span>
+				<div className="flex items-center gap-1">
+					{onDelete && (
+						<div onClick={(e) => e.stopPropagation()}>
+							<Popconfirm
+								title="确定删除该组件吗？"
+								onConfirm={(e) => {
+									e?.stopPropagation();
+									onDelete(hoverComponent);
+								}}
+							>
+								<button
+									onClick={(e) => e.stopPropagation()}
+									className="transition-colors ml-1 cursor-pointer"
+								>
+									<Trash2 size={14} />
+								</button>
+							</Popconfirm>
+						</div>
+					)}
+					{onClose && (
+						<button
+							onClick={(e) => {
+								e.stopPropagation();
+								onClose();
+							}}
+							className="transition-colors cursor-pointer"
+						>
+							<X size={14} />
+						</button>
+					)}
+				</div>
 			</div>
 		</div>,
 		document.body

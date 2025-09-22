@@ -3,9 +3,9 @@ import useComponentStore, { Component } from "@/stores/component";
 import useComponentConfigStore, {
 	ComponentConfigStore,
 } from "@/stores/component-config";
-import React, { useState, useRef } from "react";
-import HoverMask from "../hover-mask";
-import useClickOutside from "@/hooks/useClickOutside";
+import React, { useState, useCallback } from "react";
+import Mask from "../mask";
+import useElementObserver from "@/hooks/useElementObserver";
 
 /**
  * 将JSON树渲染为组件
@@ -21,12 +21,18 @@ function renderComponent(
 		// 获取组件相应的配置
 		const compConfig = config[comp.name];
 		if (!compConfig || !compConfig.component) return null;
+		const style = {
+			...compConfig.defaultStyles,
+			...(comp.styles || {}),
+		};
+		// console.log(comp.styles);
+
 		const props = {
 			key: comp.id,
 			// 传递一个data属性，方便后续查找
 			"data-component-id": comp.id,
 			name: comp.name,
-			styles: comp.styles,
+			style,
 			...compConfig.defaultProps,
 			...comp.props,
 		};
@@ -51,7 +57,7 @@ export default function Canvas() {
 		deleteComponent,
 	} = useComponentStore();
 	const [position, setPosition] = useState<DOMRect | null>(null);
-	const tagRef = useRef<HTMLDivElement>(null);
+	const [activeElement, setActiveElement] = useState<HTMLElement | null>(null);
 
 	function handleMouseOver(e: React.MouseEvent) {
 		const composedPath = e.nativeEvent.composedPath();
@@ -84,21 +90,30 @@ export default function Canvas() {
 				const comp = searchComponent(id!);
 				setActiveComponent(comp);
 				updatePosition(element);
+				// 当目标元素位置大小变化时，也要更新position
 				break;
 			}
 		}
 	};
 
-	const canvasRef = useClickOutside(() => {
-		setActiveComponent(undefined);
-		setHoverComponent(undefined);
-	}, [tagRef]);
-
 	function updatePosition(element: HTMLElement) {
 		if (!element) return;
+
+		// 更新当前元素的位置
 		const rect = element.getBoundingClientRect();
 		setPosition(rect);
+		setActiveElement(element);
 	}
+
+	// 使用自定义hook来观察活动元素的变化
+	const updatePositionCallback = useCallback(() => {
+		if (activeElement) {
+			setPosition(activeElement.getBoundingClientRect());
+		}
+	}, [activeElement]);
+
+	// 监听元素大小和位置变化
+	useElementObserver(activeElement, updatePositionCallback, [activeComponent]);
 
 	const handleDeleteComponent = (component: Component) => {
 		if (component && component.id) {
@@ -109,25 +124,20 @@ export default function Canvas() {
 
 	return (
 		<div className="h-full overflow-auto">
-			{}
 			<div
-				ref={canvasRef}
-				className="canvas h-full"
+				className="canvas h-full flex items-center justify-center bg-gray-200 relative"
 				onMouseOver={(e) => handleMouseOver(e)}
 				onMouseLeave={() => handleMouseLeave()}
 				onClick={handleClick}
 			>
 				{renderComponent(components, componentConfig)}
 			</div>
-			{/* {hoverComponent && (
-				<HoverMask position={position} hoverComponent={hoverComponent} />
-			)} */}
 			{activeComponent && (
-				<HoverMask
+				<Mask
 					position={position}
 					hoverComponent={activeComponent}
-					tagRef={tagRef}
 					onDelete={handleDeleteComponent}
+					onClose={() => setActiveComponent(undefined)}
 				/>
 			)}
 		</div>

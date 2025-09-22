@@ -10,7 +10,13 @@ export default function Page(props: PageProps) {
 		accept: ["Button", "Container"],
 	});
 	return (
-		<div ref={dropRef} className={`page h-full overflow-auto`} {...props}>
+		<div
+			ref={dropRef}
+			className={`page h-full overflow-auto bg-white ${
+				isOver ? "border-1 border-blue-300" : "border-1 border-transparent"
+			}`}
+			{...props}
+		>
 			{props.children}
 		</div>
 	);

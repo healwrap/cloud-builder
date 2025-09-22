@@ -20,7 +20,9 @@ interface ComponentStore {
 	hoverComponent: Component | null;
 	addComponent: (component: Component, parentId?: string | null) => void;
 	deleteComponent: (id: string) => void;
-	updateComponent: (id: string, newProps: Record<string, unknown>) => void;
+	updateComponentProps: (id: string, newProps: Record<string, unknown>) => void;
+	updateComponentStyles: (id: string, newStyles: CSSProperties) => void;
+	removeComponentStyles: (id: string, styleKeys: string[]) => void;
 	searchComponent: (id: string) => Component | undefined;
 	setActiveComponent: (component?: Component) => void;
 	setHoverComponent: (component?: Component) => void;
@@ -84,11 +86,65 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 			}));
 		}
 	},
-	updateComponent: (id, newProps) => {
+	updateComponentProps: (id, newProps) => {
 		if (!id) return;
 		const component = getObjectById(get().components, id);
 		if (!component) return;
-		Object.assign(component.props, newProps);
+		console.log(component);
+
+		component.props = {
+			...component.props,
+			...newProps,
+		};
+		set((state) => ({
+			components: [...state.components],
+		}));
+	},
+	updateComponentStyles: (id, newStyles) => {
+		if (!id) return;
+		const component = getObjectById(get().components, id);
+		if (!component) return;
+
+		console.log("Updating component styles:", {
+			componentId: id,
+			componentName: component.name,
+			currentStyles: component.styles,
+			newStyles: newStyles,
+		});
+
+		component.styles = {
+			...(component.styles || {}),
+			...newStyles,
+		};
+
+		console.log("Updated component styles:", component.styles);
+
+		set((state) => ({
+			components: [...state.components],
+		}));
+	},
+	removeComponentStyles: (id, styleKeys) => {
+		if (!id) return;
+		const component = getObjectById(get().components, id);
+		if (!component || !component.styles) return;
+
+		console.log("Removing component styles:", {
+			componentId: id,
+			componentName: component.name,
+			stylesToRemove: styleKeys,
+			currentStyles: component.styles,
+		});
+
+		// 创建新的样式对象，排除要删除的属性
+		const newStyles = { ...component.styles };
+		styleKeys.forEach((key) => {
+			delete newStyles[key as keyof CSSProperties];
+		});
+
+		component.styles = newStyles;
+
+		console.log("Updated component styles after removal:", component.styles);
+
 		set((state) => ({
 			components: [...state.components],
 		}));

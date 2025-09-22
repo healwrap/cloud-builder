@@ -2,17 +2,21 @@ import { create } from "zustand";
 import Container from "@/components/material/container";
 import Button from "@/components/material/button";
 import Page from "@/components/material/page";
+import { ButtonSetter, ButtonStyleSetter } from "@/lib/button-setter";
+import { ContainerStyleSetter } from "@/lib/container-setter";
+import { PageSetter, PageStyleSetter } from "@/lib/page-setter";
 
 export interface ComponentSetter {
 	name: string;
 	label: string;
 	type: string;
-	[key: string]: unknown;
+	[key: string]: string | number | boolean | object | undefined;
 }
 
 export interface ComponentConfig {
 	name: ComponentName;
 	defaultProps: Record<string, unknown>;
+	defaultStyles?: Record<string, unknown>;
 	desc: string;
 	setter?: ComponentSetter[];
 	styleSetter?: ComponentSetter[];
@@ -42,6 +46,7 @@ const useComponentConfigStore = create<ComponentConfigStore>((set) => ({
 			defaultProps: {},
 			desc: "容器",
 			component: Container,
+			styleSetter: ContainerStyleSetter,
 		},
 		Button: {
 			name: "Button",
@@ -51,12 +56,19 @@ const useComponentConfigStore = create<ComponentConfigStore>((set) => ({
 			},
 			desc: "按钮",
 			component: Button,
+			setter: ButtonSetter,
+			styleSetter: ButtonStyleSetter,
 		},
 		Page: {
 			name: "Page",
 			defaultProps: {},
+			defaultStyles: {
+				width: 375,
+				height: 812,
+			},
 			desc: "页面",
 			component: Page,
+			styleSetter: PageStyleSetter,
 		},
 	},
 	registerComponent(name, componentConfig) {
