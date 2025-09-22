@@ -37,12 +37,12 @@ const ButtonStyleSetter = [
 	{
 		name: "width",
 		label: "宽度",
-		type: "inputNumber",
+		type: "input",
 	},
 	{
 		name: "height",
 		label: "高度",
-		type: "inputNumber",
+		type: "input",
 	},
 ];
 

@@ -8,7 +8,7 @@ export default function JSONEditor() {
 		<Editor
 			className="overflow-auto h-[80vh] w-full"
 			language="json"
-			defaultValue={JSON.stringify(activeComponent, null, 2)}
+			value={JSON.stringify(activeComponent, null, 2)}
 			options={{ readOnly: true }}
 		/>
 	);

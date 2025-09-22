@@ -13,7 +13,7 @@ const PageStyleSetter = [
 		],
 	},
 	{
-		name: "flex-direction",
+		name: "flexDirection",
 		label: "主轴方向",
 		type: "select",
 		options: [
@@ -24,7 +24,7 @@ const PageStyleSetter = [
 		],
 	},
 	{
-		name: "justify-content",
+		name: "justifyContent",
 		label: "主轴对齐",
 		type: "select",
 		options: [
@@ -36,7 +36,7 @@ const PageStyleSetter = [
 		],
 	},
 	{
-		name: "align-items",
+		name: "alignItems",
 		label: "交叉轴对齐",
 		type: "select",
 		options: [
@@ -59,25 +59,25 @@ const PageStyleSetter = [
 	{
 		name: "width",
 		label: "宽度",
-		type: "inputNumber",
+		type: "input",
 	},
 	{
 		name: "height",
 		label: "高度",
-		type: "inputNumber",
+		type: "input",
 	},
 	{
-		name: "background-color",
+		name: "backgroundColor",
 		label: "背景颜色",
 		type: "colorPicker",
 	},
 	{
-		name: "border-width",
+		name: "borderWidth",
 		label: "边框宽度",
-		type: "inputNumber",
+		type: "input",
 	},
 	{
-		name: "border-style",
+		name: "borderStyle",
 		label: "边框样式",
 		type: "select",
 		options: [
@@ -89,7 +89,7 @@ const PageStyleSetter = [
 		],
 	},
 	{
-		name: "border-color",
+		name: "borderColor",
 		label: "边框颜色",
 		type: "colorPicker",
 	},

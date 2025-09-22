@@ -1,3 +1,4 @@
+import { parseCSS, stylesToCSS } from "@/lib/utils";
 import useComponentStore from "@/stores/component";
 import useComponentConfigStore, {
 	ComponentSetter,
@@ -9,11 +10,12 @@ import {
 	InputNumber,
 	Select,
 	ColorPicker,
-	Splitter,
 	Divider,
+	Modal,
+	Button,
 } from "antd";
 import type { SelectProps } from "antd";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { CSSProperties } from "react";
 
 // 处理表单值转换的工具函数
@@ -72,11 +74,13 @@ export default function StyleEditor() {
 	const [form] = Form.useForm();
 	const { componentConfig } = useComponentConfigStore();
 	const { activeComponent, updateComponent } = useComponentStore();
+	const [isEditorModalOpen, setIsEditorModalOpen] = useState(false);
+	const [cssCode, setCssCode] = useState("");
 
 	const componentType = activeComponent?.name;
 	const currentConfig = componentType ? componentConfig[componentType] : null;
 
-	// 修复表单值切换问题
+	// 修复表单值切换问题 + CSS编辑器同步
 	useEffect(() => {
 		if (activeComponent && currentConfig) {
 			// 获取当前组件配置支持的所有样式字段
@@ -93,8 +97,12 @@ export default function StyleEditor() {
 			});
 
 			form.setFieldsValue(formValues);
+
+			// 同步CSS编辑器的值
+			setCssCode(stylesToCSS(activeComponent.styles || {}));
 		} else {
 			form.resetFields();
+			setCssCode(stylesToCSS({}));
 		}
 	}, [activeComponent, currentConfig, form]);
 
@@ -116,12 +124,47 @@ export default function StyleEditor() {
 		}
 	};
 
+	// 处理CSS编辑器的变化
+	const handleCSSChange = (value: string | undefined) => {
+		if (!value || !activeComponent) return;
+
+		setCssCode(value);
+
+		try {
+			const parsedStyles = parseCSS(value);
+			updateComponent(activeComponent.id, {
+				styles: parsedStyles,
+			});
+
+			// 同步表单值
+			const formValues: Record<string, unknown> = {};
+			const supportedStyleFields =
+				currentConfig?.styleSetter?.map((setter) => setter.name) || [];
+
+			supportedStyleFields.forEach((field) => {
+				formValues[field] =
+					parsedStyles[field as keyof CSSProperties] || undefined;
+			});
+
+			form.setFieldsValue(formValues);
+		} catch (error) {
+			console.error("CSS parsing failed:", error);
+		}
+	};
+
 	if (!activeComponent) {
 		return <div className="p-4 text-gray-500">请选择一个组件</div>;
 	}
 
+	function setModal(open: boolean) {
+		if (open) {
+			setCssCode(stylesToCSS(activeComponent?.styles || {}));
+		}
+		setIsEditorModalOpen(open);
+	}
+
 	return (
-		<div className="my-4 overflow-auto">
+		<div className="my-4 h-full overflow-auto">
 			<Form
 				form={form}
 				labelCol={{ span: 8 }}
@@ -133,13 +176,40 @@ export default function StyleEditor() {
 						{renderFormElement(item)}
 					</Form.Item>
 				))}
-				<Divider>样式编辑器</Divider>
 			</Form>
-			<Editor
-				className="overflow-auto h-[400px] w-full"
-				language="css"
-				defaultValue={JSON.stringify(activeComponent.styles, null, 2)}
-			/>
+			<Divider>样式编辑器</Divider>
+			<div className="h-40 flex justify-center">
+				<Button type="primary" onClick={() => setModal(true)}>
+					打开样式编辑器
+				</Button>
+			</div>
+			<Modal
+				title="样式编辑器"
+				open={isEditorModalOpen}
+				onCancel={() => setModal(false)}
+				footer={null}
+				width="80%"
+				style={{ top: 20 }}
+			>
+				<div className="h-[600px]">
+					<Editor
+						className="overflow-auto w-full"
+						language="css"
+						theme="vs-dark"
+						value={cssCode}
+						onChange={handleCSSChange}
+						options={{
+							minimap: { enabled: false },
+							scrollBeyondLastLine: false,
+							wordWrap: "on",
+							fontSize: 14,
+							lineNumbers: "on",
+							folding: true,
+							automaticLayout: true,
+						}}
+					/>
+				</div>
+			</Modal>
 		</div>
 	);
 }

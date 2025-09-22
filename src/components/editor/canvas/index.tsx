@@ -21,7 +21,7 @@ function renderComponent(
 		// 获取组件相应的配置
 		const compConfig = config[comp.name];
 		if (!compConfig || !compConfig.component) return null;
-		const style = {
+		comp.styles = {
 			...compConfig.defaultStyles,
 			...(comp.styles || {}),
 		};
@@ -32,7 +32,7 @@ function renderComponent(
 			// 传递一个data属性，方便后续查找
 			"data-component-id": comp.id,
 			name: comp.name,
-			style,
+			style: comp.styles,
 			...compConfig.defaultProps,
 			...comp.props,
 		};

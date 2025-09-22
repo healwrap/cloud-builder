@@ -79,8 +79,8 @@ const useComponentConfigStore = create<ComponentConfigStore>((set) => ({
 			name: "Page",
 			defaultProps: {},
 			defaultStyles: {
-				width: 375,
-				height: 667,
+				width: '375px',
+				height: '667px',
 			},
 			desc: "页面",
 			component: Page,

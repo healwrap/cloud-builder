@@ -36,7 +36,7 @@ export default function Setting() {
 				block
 				onChange={(value) => setKey(value as TabKey)}
 			/>
-			<div className="my-2 overflow-auto h-[90%]">
+			<div className="my-2 overflow-y-auto h-screen">
 				{key === "attr" && <AttrEditor />}
 				{key === "style" && <StyleEditor />}
 				{key === "event" && <EventEditor />}
