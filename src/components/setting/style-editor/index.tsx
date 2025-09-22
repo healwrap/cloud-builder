@@ -2,10 +2,53 @@ import useComponentStore from "@/stores/component";
 import useComponentConfigStore, {
 	ComponentSetter,
 } from "@/stores/component-config";
-import { Form, Input, InputNumber, Select, ColorPicker } from "antd";
+import { Editor } from "@monaco-editor/react";
+import {
+	Form,
+	Input,
+	InputNumber,
+	Select,
+	ColorPicker,
+	Splitter,
+	Divider,
+} from "antd";
 import type { SelectProps } from "antd";
 import React, { useEffect } from "react";
 import { CSSProperties } from "react";
+
+// 处理表单值转换的工具函数
+function processFormValue(value: unknown): string | number | null {
+	// 空值处理
+	if (value === null || value === undefined || value === "") {
+		return null;
+	}
+
+	// 基本类型直接返回
+	if (typeof value === "string" || typeof value === "number") {
+		return value;
+	}
+
+	// 颜色对象处理
+	if (value && typeof value === "object") {
+		const colorObj = value as Record<string, unknown>;
+		if (
+			"toHexString" in colorObj &&
+			typeof colorObj.toHexString === "function"
+		) {
+			return (colorObj.toHexString as () => string)();
+		}
+		if ("hex" in colorObj && typeof colorObj.hex === "string") {
+			return colorObj.hex;
+		}
+		// 其他对象转换为字符串
+		const stringValue = String(value);
+		return stringValue === "undefined" || stringValue === "null"
+			? null
+			: stringValue;
+	}
+
+	return null;
+}
 
 // 渲染表单元素
 function renderFormElement(setter: ComponentSetter) {
@@ -13,105 +56,68 @@ function renderFormElement(setter: ComponentSetter) {
 
 	switch (type) {
 		case "select":
-			return <Select options={options as SelectProps["options"]} />;
+			return <Select options={options as SelectProps["options"]} allowClear />;
 		case "input":
-			return <Input />;
+			return <Input allowClear />;
 		case "inputNumber":
 			return <InputNumber />;
 		case "colorPicker":
-			return <ColorPicker format="hex" showText />;
+			return <ColorPicker format="hex" showText allowClear />;
 		default:
-			return <Input />;
+			return <Input allowClear />;
 	}
 }
 
 export default function StyleEditor() {
 	const [form] = Form.useForm();
 	const { componentConfig } = useComponentConfigStore();
-	const { activeComponent, updateComponentStyles, removeComponentStyles } =
-		useComponentStore();
+	const { activeComponent, updateComponent } = useComponentStore();
 
 	const componentType = activeComponent?.name;
 	const currentConfig = componentType ? componentConfig[componentType] : null;
 
+	// 修复表单值切换问题
 	useEffect(() => {
-		if (activeComponent) {
-			// 设置表单值，包括基本信息和样式
-			form.setFieldsValue({
-				id: activeComponent.id,
-				name: activeComponent.name,
-				desc: activeComponent.desc,
-				...(activeComponent.styles || {}),
+		if (activeComponent && currentConfig) {
+			// 获取当前组件配置支持的所有样式字段
+			const supportedStyleFields =
+				currentConfig.styleSetter?.map((setter) => setter.name) || [];
+
+			// 创建完整的表单值对象，包含基本信息和样式
+			const formValues: Record<string, unknown> = {};
+
+			// 为所有支持的样式字段设置值（如果组件有该样式）或设置为 undefined（清空字段）
+			supportedStyleFields.forEach((field) => {
+				formValues[field] =
+					activeComponent.styles?.[field as keyof CSSProperties] || undefined;
 			});
+
+			form.setFieldsValue(formValues);
+		} else {
+			form.resetFields();
 		}
-	}, [activeComponent, form]);
+	}, [activeComponent, currentConfig, form]);
 
 	const handleValuesChange = (changedValues: Record<string, unknown>) => {
-		if (activeComponent) {
-			// 分别收集要更新的样式和要删除的样式
-			const styleChanges: Record<string, string | number> = {};
-			const stylesToRemove: string[] = [];
+		if (!activeComponent) return;
 
-			// 过滤掉id、name和desc字段
-			Object.keys(changedValues).forEach((key) => {
-				if (!["id", "name", "desc"].includes(key)) {
-					const value = changedValues[key];
+		// 过滤并处理样式值
+		const styleUpdates: Record<string, string | number | null> = {};
 
-					// 检查值是否为空（null、undefined、空字符串）
-					if (value === null || value === undefined || value === "") {
-						stylesToRemove.push(key);
-						return;
-					}
+		Object.entries(changedValues).forEach(([key, value]) => {
+			styleUpdates[key] = processFormValue(value);
+		});
 
-					// 处理不同类型的值
-					if (typeof value === "string" || typeof value === "number") {
-						styleChanges[key] = value;
-					} else if (value && typeof value === "object") {
-						// 处理颜色选择器返回的对象
-						const colorObj = value as Record<string, unknown>;
-						if (
-							"toHexString" in colorObj &&
-							typeof colorObj.toHexString === "function"
-						) {
-							// Ant Design ColorPicker 返回的颜色对象
-							styleChanges[key] = (colorObj.toHexString as () => string)();
-						} else if ("hex" in colorObj && typeof colorObj.hex === "string") {
-							// 如果对象包含 hex 属性
-							styleChanges[key] = colorObj.hex;
-						} else {
-							// 尝试转换为字符串
-							const stringValue = String(value);
-							if (
-								stringValue &&
-								stringValue !== "undefined" &&
-								stringValue !== "null"
-							) {
-								styleChanges[key] = stringValue;
-							} else {
-								stylesToRemove.push(key);
-							}
-						}
-					}
-				}
+		// 只有当有样式变化时才更新
+		if (Object.keys(styleUpdates).length > 0) {
+			updateComponent(activeComponent.id, {
+				styles: styleUpdates as CSSProperties,
 			});
-
-			// 先删除空值对应的样式
-			if (stylesToRemove.length > 0) {
-				removeComponentStyles(activeComponent.id, stylesToRemove);
-			}
-
-			// 再更新有值的样式
-			if (Object.keys(styleChanges).length > 0) {
-				updateComponentStyles(
-					activeComponent.id,
-					styleChanges as unknown as CSSProperties
-				);
-			}
 		}
 	};
 
 	if (!activeComponent) {
-		return <div>请选择一个组件</div>;
+		return <div className="p-4 text-gray-500">请选择一个组件</div>;
 	}
 
 	return (
@@ -122,22 +128,18 @@ export default function StyleEditor() {
 				wrapperCol={{ span: 14 }}
 				onValuesChange={handleValuesChange}
 			>
-				<Form.Item label="ID" name="id">
-					<Input disabled />
-				</Form.Item>
-				<Form.Item label="名称" name="name">
-					<Input disabled />
-				</Form.Item>
-				<Form.Item label="描述" name="desc">
-					<Input disabled />
-				</Form.Item>
-
 				{currentConfig?.styleSetter?.map((item) => (
 					<Form.Item key={item.name} label={item.label} name={item.name}>
 						{renderFormElement(item)}
 					</Form.Item>
 				))}
+				<Divider>样式编辑器</Divider>
 			</Form>
+			<Editor
+				className="overflow-auto h-[400px] w-full"
+				language="css"
+				defaultValue={JSON.stringify(activeComponent.styles, null, 2)}
+			/>
 		</div>
 	);
 }

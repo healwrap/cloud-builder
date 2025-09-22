@@ -20,23 +20,34 @@ function renderFormElement(setter: ComponentSetter) {
 export default function AttrEditor() {
 	const [form] = Form.useForm();
 	const { componentConfig } = useComponentConfigStore();
-	const { activeComponent, updateComponentProps } =
-		useComponentStore();
+	const { activeComponent, updateComponent } = useComponentStore();
 
 	const componentType = activeComponent?.name;
 	const currentConfig = componentType ? componentConfig[componentType] : null;
 
 	useEffect(() => {
-		if (activeComponent) {
-			// 设置表单值，包括基本信息和属性
-			form.setFieldsValue({
+		if (activeComponent && currentConfig) {
+			// 获取当前组件配置支持的所有属性字段
+			const supportedPropFields =
+				currentConfig.setter?.map((setter) => setter.name) || [];
+
+			// 创建完整的表单值对象，包含基本信息和属性
+			const formValues: Record<string, unknown> = {
 				id: activeComponent.id,
 				name: activeComponent.name,
 				desc: activeComponent.desc,
-				...activeComponent.props,
+			};
+
+			// 为所有支持的属性字段设置值（如果组件有该属性）或设置为 undefined（清空字段）
+			supportedPropFields.forEach((field) => {
+				formValues[field] = activeComponent.props?.[field] || undefined;
 			});
+
+			form.setFieldsValue(formValues);
+		} else {
+			form.resetFields();
 		}
-	}, [activeComponent, form]);
+	}, [activeComponent, currentConfig, form]);
 
 	const handleValuesChange = (changedValues: Record<string, unknown>) => {
 		if (activeComponent) {
@@ -52,7 +63,7 @@ export default function AttrEditor() {
 
 			// 只有当有属性变化时才更新
 			if (Object.keys(propChanges).length > 0) {
-				updateComponentProps(activeComponent.id, propChanges);
+				updateComponent(activeComponent.id, { props: propChanges });
 			}
 		}
 	};

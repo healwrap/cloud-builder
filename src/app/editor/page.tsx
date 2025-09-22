@@ -4,7 +4,7 @@ import React from "react";
 import { Allotment } from "allotment";
 import { useUser } from "@clerk/nextjs";
 import EditorHeader from "@/components/editor/header";
-import Material from "@/components/editor/material";
+import ComponentPanel from "@/components/editor/component-panel";
 import Canvas from "@/components/editor/canvas";
 import Setting from "@/components/editor/setting";
 import Loading from "@/components/ui/Loading";
@@ -23,13 +23,13 @@ export default function EditorPage() {
 			<EditorHeader />
 			<DndProvider backend={HTML5Backend}>
 				<Allotment>
-					<Allotment.Pane minSize={200} preferredSize={"20%"}>
-						<Material />
+					<Allotment.Pane minSize={270} preferredSize={"20%"}>
+						<ComponentPanel />
 					</Allotment.Pane>
 					<Allotment.Pane minSize={400} preferredSize={"60%"}>
 						<Canvas />
 					</Allotment.Pane>
-					<Allotment.Pane minSize={200} preferredSize={"20%"}>
+					<Allotment.Pane minSize={270} preferredSize={"20%"}>
 						<Setting />
 					</Allotment.Pane>
 				</Allotment>

@@ -4,7 +4,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { Popconfirm } from "antd";
 
-interface MaskProps {
+interface ActiveMaskProps {
 	position: DOMRect | null;
 	hoverComponent: Component;
 	tagRef?: React.RefObject<HTMLDivElement | null>;
@@ -12,13 +12,13 @@ interface MaskProps {
 	onClose?: () => void;
 }
 
-export default function Mask({
+export default function ActiveMask({
 	position,
 	hoverComponent,
 	tagRef,
 	onDelete,
 	onClose,
-}: MaskProps) {
+}: ActiveMaskProps) {
 	if (!position) return null;
 	const { top, left, width, height } = position;
 	const tagWidth = 90; // 增加宽度以适应删除按钮
@@ -28,7 +28,7 @@ export default function Mask({
 	return createPortal(
 		<div className="mask-container absolute w-0 h-0 top-0 left-0">
 			<div
-				className="absolute mask border-2 border-dashed border-blue-500 bg-blue-500/20 pointer-events-none transition-all duration-75 ease-linear"
+				className="absolute mask border-2 border-dashed border-blue-500 pointer-events-none transition-all duration-75 ease-linear" // bg-blue-500/20
 				style={{ top, left, width, height }}
 			></div>
 			<div

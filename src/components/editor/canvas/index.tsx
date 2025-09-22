@@ -1,11 +1,11 @@
-import useMaterialDrop from "@/hooks/useMaterialDrop";
 import useComponentStore, { Component } from "@/stores/component";
 import useComponentConfigStore, {
 	ComponentConfigStore,
 } from "@/stores/component-config";
-import React, { useState, useCallback } from "react";
-import Mask from "../mask";
+import React, { useState, useCallback, Dispatch } from "react";
+import ActiveMask from "../active-mask";
 import useElementObserver from "@/hooks/useElementObserver";
+import HoverMask from "../hover-mask";
 
 /**
  * 将JSON树渲染为组件
@@ -51,12 +51,15 @@ export default function Canvas() {
 		components,
 		activeComponent,
 		hoverComponent,
+		activePosition,
+		hoverPosition,
 		searchComponent,
 		setActiveComponent,
 		setHoverComponent,
+		setActivePosition,
+		setHoverPosition,
 		deleteComponent,
 	} = useComponentStore();
-	const [position, setPosition] = useState<DOMRect | null>(null);
 	const [activeElement, setActiveElement] = useState<HTMLElement | null>(null);
 
 	function handleMouseOver(e: React.MouseEvent) {
@@ -69,7 +72,7 @@ export default function Canvas() {
 				const id = element.getAttribute("data-component-id");
 				const comp = searchComponent(id!);
 				setHoverComponent(comp);
-				// updatePosition(element);
+				updatePosition(element, setHoverPosition);
 				break;
 			}
 		}
@@ -89,28 +92,30 @@ export default function Canvas() {
 				const id = element.getAttribute("data-component-id");
 				const comp = searchComponent(id!);
 				setActiveComponent(comp);
-				updatePosition(element);
-				// 当目标元素位置大小变化时，也要更新position
+				setActiveElement(element);
+				updatePosition(element, setActivePosition);
 				break;
 			}
 		}
 	};
 
-	function updatePosition(element: HTMLElement) {
+	function updatePosition(
+		element: HTMLElement,
+		setPosition: Dispatch<DOMRect>
+	) {
 		if (!element) return;
 
 		// 更新当前元素的位置
 		const rect = element.getBoundingClientRect();
 		setPosition(rect);
-		setActiveElement(element);
 	}
 
 	// 使用自定义hook来观察活动元素的变化
 	const updatePositionCallback = useCallback(() => {
 		if (activeElement) {
-			setPosition(activeElement.getBoundingClientRect());
+			setActivePosition(activeElement.getBoundingClientRect());
 		}
-	}, [activeElement]);
+	}, [activeElement, setActivePosition]);
 
 	// 监听元素大小和位置变化
 	useElementObserver(activeElement, updatePositionCallback, [activeComponent]);
@@ -132,12 +137,16 @@ export default function Canvas() {
 			>
 				{renderComponent(components, componentConfig)}
 			</div>
+			{hoverComponent && <HoverMask position={hoverPosition} />}
 			{activeComponent && (
-				<Mask
-					position={position}
+				<ActiveMask
+					position={activePosition}
 					hoverComponent={activeComponent}
 					onDelete={handleDeleteComponent}
-					onClose={() => setActiveComponent(undefined)}
+					onClose={() => {
+						setActiveComponent(undefined);
+						setActivePosition(null);
+					}}
 				/>
 			)}
 		</div>

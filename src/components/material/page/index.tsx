@@ -6,9 +6,7 @@ interface PageProps {
 }
 
 export default function Page(props: PageProps) {
-	const { isOver, dropRef } = useMaterialDrop({
-		accept: ["Button", "Container"],
-	});
+	const { isOver, dropRef } = useMaterialDrop();
 	return (
 		<div
 			ref={dropRef}

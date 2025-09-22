@@ -18,14 +18,19 @@ interface ComponentStore {
 	components: Component[];
 	activeComponent: Component | null;
 	hoverComponent: Component | null;
+	activePosition: DOMRect | null;
+	hoverPosition: DOMRect | null;
 	addComponent: (component: Component, parentId?: string | null) => void;
 	deleteComponent: (id: string) => void;
-	updateComponentProps: (id: string, newProps: Record<string, unknown>) => void;
-	updateComponentStyles: (id: string, newStyles: CSSProperties) => void;
-	removeComponentStyles: (id: string, styleKeys: string[]) => void;
+	updateComponent: (
+		id: string,
+		updates: { props?: Record<string, unknown>; styles?: CSSProperties }
+	) => void;
 	searchComponent: (id: string) => Component | undefined;
 	setActiveComponent: (component?: Component) => void;
 	setHoverComponent: (component?: Component) => void;
+	setActivePosition: (position: DOMRect | null) => void;
+	setHoverPosition: (position: DOMRect | null) => void;
 }
 
 /**
@@ -42,6 +47,8 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 	],
 	activeComponent: null,
 	hoverComponent: null,
+	activePosition: null,
+	hoverPosition: null,
 	addComponent: (component) => {
 		set((state) => {
 			const parentId = component.parentId;
@@ -86,64 +93,49 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 			}));
 		}
 	},
-	updateComponentProps: (id, newProps) => {
-		if (!id) return;
-		const component = getObjectById(get().components, id);
-		if (!component) return;
-		console.log(component);
-
-		component.props = {
-			...component.props,
-			...newProps,
-		};
-		set((state) => ({
-			components: [...state.components],
-		}));
-	},
-	updateComponentStyles: (id, newStyles) => {
+	updateComponent: (id, updates) => {
 		if (!id) return;
 		const component = getObjectById(get().components, id);
 		if (!component) return;
 
-		console.log("Updating component styles:", {
+		console.log("Updating component:", {
 			componentId: id,
 			componentName: component.name,
-			currentStyles: component.styles,
-			newStyles: newStyles,
+			updates: updates,
 		});
 
-		component.styles = {
-			...(component.styles || {}),
-			...newStyles,
-		};
+		// 更新 props
+		if (updates.props) {
+			// 处理空值删除逻辑
+			const newProps = { ...component.props };
+			Object.entries(updates.props).forEach(([key, value]) => {
+				if (value === null || value === undefined || value === "") {
+					delete newProps[key];
+				} else {
+					newProps[key] = value;
+				}
+			});
+			component.props = newProps;
+		}
 
-		console.log("Updated component styles:", component.styles);
+		// 更新 styles
+		if (updates.styles) {
+			// 处理空值删除逻辑
+			const newStyles = { ...(component.styles || {}) };
+			Object.entries(updates.styles).forEach(([key, value]) => {
+				if (value === null || value === undefined || value === "") {
+					delete newStyles[key as keyof CSSProperties];
+				} else {
+					(newStyles as Record<string, unknown>)[key] = value;
+				}
+			});
+			component.styles = newStyles;
+		}
 
-		set((state) => ({
-			components: [...state.components],
-		}));
-	},
-	removeComponentStyles: (id, styleKeys) => {
-		if (!id) return;
-		const component = getObjectById(get().components, id);
-		if (!component || !component.styles) return;
-
-		console.log("Removing component styles:", {
-			componentId: id,
-			componentName: component.name,
-			stylesToRemove: styleKeys,
-			currentStyles: component.styles,
+		console.log("Updated component:", {
+			props: component.props,
+			styles: component.styles,
 		});
-
-		// 创建新的样式对象，排除要删除的属性
-		const newStyles = { ...component.styles };
-		styleKeys.forEach((key) => {
-			delete newStyles[key as keyof CSSProperties];
-		});
-
-		component.styles = newStyles;
-
-		console.log("Updated component styles after removal:", component.styles);
 
 		set((state) => ({
 			components: [...state.components],
@@ -159,6 +151,14 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 	setHoverComponent: (component) =>
 		set(() => ({
 			hoverComponent: component,
+		})),
+	setActivePosition: (position) =>
+		set(() => ({
+			activePosition: position,
+		})),
+	setHoverPosition: (position) =>
+		set(() => ({
+			hoverPosition: position,
 		})),
 }));
 

@@ -2,9 +2,11 @@ import { create } from "zustand";
 import Container from "@/components/material/container";
 import Button from "@/components/material/button";
 import Page from "@/components/material/page";
+import Text from "@/components/material/text";
 import { ButtonSetter, ButtonStyleSetter } from "@/lib/button-setter";
 import { ContainerStyleSetter } from "@/lib/container-setter";
-import { PageSetter, PageStyleSetter } from "@/lib/page-setter";
+import { PageStyleSetter } from "@/lib/page-setter";
+import { TextSetter, TextType } from "@/lib/text-setter";
 
 export interface ComponentSetter {
 	name: string;
@@ -17,6 +19,7 @@ export interface ComponentConfig {
 	name: ComponentName;
 	defaultProps: Record<string, unknown>;
 	defaultStyles?: Record<string, unknown>;
+	hasChildren: boolean;
 	desc: string;
 	setter?: ComponentSetter[];
 	styleSetter?: ComponentSetter[];
@@ -24,7 +27,7 @@ export interface ComponentConfig {
 	component: React.ComponentType<any>;
 }
 
-export type ComponentName = "Button" | "Page" | "Container";
+export type ComponentName = "Button" | "Text" | "Page" | "Container";
 
 export interface ComponentConfigStore {
 	componentConfig: {
@@ -46,7 +49,19 @@ const useComponentConfigStore = create<ComponentConfigStore>((set) => ({
 			defaultProps: {},
 			desc: "容器",
 			component: Container,
+			hasChildren: true,
 			styleSetter: ContainerStyleSetter,
+		},
+		Text: {
+			name: "Text",
+			defaultProps: {
+				text: "文本",
+				type: "p",
+			},
+			desc: "文字",
+			component: Text,
+			hasChildren: false,
+			setter: TextSetter,
 		},
 		Button: {
 			name: "Button",
@@ -56,6 +71,7 @@ const useComponentConfigStore = create<ComponentConfigStore>((set) => ({
 			},
 			desc: "按钮",
 			component: Button,
+			hasChildren: false,
 			setter: ButtonSetter,
 			styleSetter: ButtonStyleSetter,
 		},
@@ -64,10 +80,11 @@ const useComponentConfigStore = create<ComponentConfigStore>((set) => ({
 			defaultProps: {},
 			defaultStyles: {
 				width: 375,
-				height: 812,
+				height: 667,
 			},
 			desc: "页面",
 			component: Page,
+			hasChildren: true,
 			styleSetter: PageStyleSetter,
 		},
 	},

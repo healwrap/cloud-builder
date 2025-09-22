@@ -6,16 +6,12 @@ import { useEffect, useRef } from "react";
 import { useDrop } from "react-dnd";
 import { nanoid } from "nanoid";
 
-interface UseMaterialDropProps {
-	accept: ComponentName[];
-}
-
-export default function useMaterialDrop({ accept }: UseMaterialDropProps) {
+export default function useMaterialDrop() {
 	const { componentConfig } = useComponentConfigStore();
-	const { components, addComponent } = useComponentStore();
+	const { components, addComponent, searchComponent } = useComponentStore();
 	const dropRef = useRef<HTMLDivElement>(null);
 	const [{ isOver }, drop] = useDrop(() => ({
-		accept,
+		accept: Object.keys(componentConfig) as ComponentName[],
 		drop: (item: { type: ComponentName }, monitor) => {
 			// 如果已经被处理，则不再处理
 			if (monitor.didDrop()) {
@@ -26,11 +22,27 @@ export default function useMaterialDrop({ accept }: UseMaterialDropProps) {
 			if (!dropTarget) {
 				return;
 			}
-			const dropElement = document.elementFromPoint(dropTarget.x, dropTarget.y);
-			const targetId = dropElement?.getAttribute("data-component-id");
+			let dropElement = document.elementFromPoint(dropTarget.x, dropTarget.y);
+			let targetId = dropElement?.getAttribute("data-component-id");
 
-			// 在此处理拖拽放置逻辑
-			console.log("Item dropped:", item, "targetId:", targetId);
+			// 递归查找最近的可添加子元素的父组件
+			let parent = searchComponent(targetId || "");
+			let parentConfig = parent ? componentConfig[parent.name] : undefined;
+			while (parent && (!parentConfig || !parentConfig.hasChildren)) {
+				// 向上查找父节点
+				const parentElement = dropElement?.parentElement;
+				if (!parentElement) break;
+				dropElement = parentElement;
+				targetId = dropElement.getAttribute("data-component-id");
+				parent = searchComponent(targetId || "");
+				parentConfig = parent ? componentConfig[parent.name] : undefined;
+			}
+
+			if (!parent || !parentConfig || !parentConfig.hasChildren) {
+				// 没有找到可添加子元素的父组件
+				return;
+			}
+
 			addComponent({
 				id: nanoid(10),
 				name: item.type,

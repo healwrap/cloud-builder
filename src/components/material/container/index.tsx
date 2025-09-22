@@ -6,9 +6,7 @@ interface ContainerProps {
 }
 
 export default function Container(props: ContainerProps) {
-	const { isOver, dropRef } = useMaterialDrop({
-		accept: ["Button", "Container"],
-	});
+	const { isOver, dropRef } = useMaterialDrop();
 	return (
 		<div
 			ref={dropRef}

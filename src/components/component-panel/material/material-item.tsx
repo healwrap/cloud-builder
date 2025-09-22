@@ -21,7 +21,7 @@ export default function MaterialItem({ name }: MaterialItemProps) {
 	return (
 		<div
 			ref={elementRef}
-			className="inline-block border border-dashed border-black cursor-pointer m-1 py-2 px-4 hover:bg-gray-100 active:bg-gray-200"
+			className="inline-block border border-dashed border-black cursor-pointer m-1 py-1 px-2 hover:bg-gray-100 active:bg-gray-200"
 		>
 			{name}
 		</div>
