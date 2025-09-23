@@ -6,7 +6,7 @@ interface PageProps {
 }
 
 export default function Page(props: PageProps) {
-	const { isOver, dropRef } = useMaterialDrop();
+	const { dropRef } = useMaterialDrop();
 	return (
 		<div
 			ref={dropRef}

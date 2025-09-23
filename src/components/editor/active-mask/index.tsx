@@ -1,5 +1,5 @@
 import { Component } from "@/stores/component";
-import { ClosedCaption, Trash2, X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import React from "react";
 import { createPortal } from "react-dom";
 import { Popconfirm } from "antd";

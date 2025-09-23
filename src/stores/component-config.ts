@@ -6,7 +6,7 @@ import Text from "@/components/material/text";
 import { ButtonSetter, ButtonStyleSetter } from "@/lib/button-setter";
 import { ContainerStyleSetter } from "@/lib/container-setter";
 import { PageStyleSetter } from "@/lib/page-setter";
-import { TextSetter, TextType } from "@/lib/text-setter";
+import { TextSetter } from "@/lib/text-setter";
 
 export interface ComponentSetter {
 	name: string;

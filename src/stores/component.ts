@@ -40,6 +40,8 @@ interface ComponentStore {
 	setHoverComponent: (component?: Component) => void;
 	setActivePosition: (position: DOMRect | null) => void;
 	setHoverPosition: (position: DOMRect | null) => void;
+	setComponents: (components: Component[]) => void;
+	resetActiveStates: () => void;
 }
 
 /**
@@ -240,6 +242,17 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 	setHoverPosition: (position) =>
 		set(() => ({
 			hoverPosition: position,
+		})),
+	setComponents: (components) =>
+		set(() => ({
+			components,
+		})),
+	resetActiveStates: () =>
+		set(() => ({
+			activeComponent: null,
+			hoverComponent: null,
+			activePosition: null,
+			hoverPosition: null,
 		})),
 }));
 
