@@ -47,6 +47,12 @@ const useComponentConfigStore = create<ComponentConfigStore>((set) => ({
 		Container: {
 			name: "Container",
 			defaultProps: {},
+			defaultStyles: {
+				padding: "10px",
+				borderWidth: "1px",
+				borderColor: "#000000",
+				borderStyle: "solid",
+			},
 			desc: "容器",
 			component: Container,
 			hasChildren: true,
@@ -79,8 +85,8 @@ const useComponentConfigStore = create<ComponentConfigStore>((set) => ({
 			name: "Page",
 			defaultProps: {},
 			defaultStyles: {
-				width: '375px',
-				height: '667px',
+				width: "375px",
+				height: "667px",
 			},
 			desc: "页面",
 			component: Page,

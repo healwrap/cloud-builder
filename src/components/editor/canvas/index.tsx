@@ -2,7 +2,13 @@ import useComponentStore, { Component } from "@/stores/component";
 import useComponentConfigStore, {
 	ComponentConfigStore,
 } from "@/stores/component-config";
-import React, { useState, useCallback, Dispatch } from "react";
+import React, {
+	useState,
+	useCallback,
+	Dispatch,
+	useEffect,
+	useRef,
+} from "react";
 import ActiveMask from "../active-mask";
 import useElementObserver from "@/hooks/useElementObserver";
 import HoverMask from "../hover-mask";
@@ -61,8 +67,47 @@ export default function Canvas() {
 		deleteComponent,
 	} = useComponentStore();
 	const [activeElement, setActiveElement] = useState<HTMLElement | null>(null);
+	const [isScrolling, setIsScrolling] = useState(false);
+	const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const canvasRef = useRef<HTMLDivElement>(null);
+
+	// 处理滚动事件
+	const handleScroll = useCallback(() => {
+		setIsScrolling(true);
+		// 在滚动时暂时清除 hover 状态
+		setHoverComponent(undefined);
+
+		// 清除之前的定时器
+		if (scrollTimeoutRef.current) {
+			clearTimeout(scrollTimeoutRef.current);
+		}
+
+		// 设置新的定时器，在停止滚动后恢复 hover 检测
+		scrollTimeoutRef.current = setTimeout(() => {
+			setIsScrolling(false);
+		}, 150); // 150ms 后认为滚动停止
+	}, [setHoverComponent]);
+
+	// 添加滚动事件监听
+	useEffect(() => {
+		const canvasElement = canvasRef.current;
+		if (canvasElement) {
+			canvasElement.addEventListener("scroll", handleScroll, { passive: true });
+			return () => {
+				canvasElement.removeEventListener("scroll", handleScroll);
+				if (scrollTimeoutRef.current) {
+					clearTimeout(scrollTimeoutRef.current);
+				}
+			};
+		}
+	}, [handleScroll]);
 
 	function handleMouseOver(e: React.MouseEvent) {
+		// 如果正在滚动，跳过 hover 处理
+		if (isScrolling) {
+			return;
+		}
+
 		const composedPath = e.nativeEvent.composedPath();
 		for (const element of composedPath) {
 			if (
@@ -128,9 +173,9 @@ export default function Canvas() {
 	};
 
 	return (
-		<div className="h-full overflow-auto">
+		<div ref={canvasRef} className="relative h-full overflow-auto">
 			<div
-				className="canvas h-full flex items-center justify-center bg-gray-200 relative"
+				className="canvas min-h-full flex flex-col items-center gap-4 bg-gray-200 relative overflow-auto p-4"
 				onMouseOver={(e) => handleMouseOver(e)}
 				onMouseLeave={() => handleMouseLeave()}
 				onClick={handleClick}

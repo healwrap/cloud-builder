@@ -33,7 +33,7 @@ export default function ActiveMask({
 			></div>
 			<div
 				ref={tagRef}
-				className="absolute tag cursor-move text-white text-xs rounded-sm flex items-center justify-between px-2"
+				className="absolute tag text-white text-xs rounded-sm flex items-center justify-between px-2"
 				style={{
 					top: tagTop,
 					left: tagLeft,
@@ -53,12 +53,12 @@ export default function ActiveMask({
 									onDelete(hoverComponent);
 								}}
 							>
-								<button
+								<div
 									onClick={(e) => e.stopPropagation()}
-									className="transition-colors ml-1 cursor-pointer"
+									className="cursor-pointer hover:bg-white/20 rounded transition-colors"
 								>
 									<Trash2 size={14} />
-								</button>
+								</div>
 							</Popconfirm>
 						</div>
 					)}
@@ -68,7 +68,7 @@ export default function ActiveMask({
 								e.stopPropagation();
 								onClose();
 							}}
-							className="transition-colors cursor-pointer"
+							className="cursor-pointer hover:bg-white/20 rounded transition-colors"
 						>
 							<X size={14} />
 						</button>

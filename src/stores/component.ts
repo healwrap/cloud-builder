@@ -20,11 +20,20 @@ interface ComponentStore {
 	hoverComponent: Component | null;
 	activePosition: DOMRect | null;
 	hoverPosition: DOMRect | null;
-	addComponent: (component: Component, parentId?: string | null) => void;
+	addPage: () => void;
+	addComponent: (
+		component: Omit<Component, "id">,
+		parentId?: string | null
+	) => void;
 	deleteComponent: (id: string) => void;
 	updateComponent: (
 		id: string,
 		updates: { props?: Record<string, unknown>; styles?: CSSProperties }
+	) => void;
+	moveComponent: (
+		componentId: string,
+		newParentId: string | null,
+		index?: number
 	) => void;
 	searchComponent: (id: string) => Component | undefined;
 	setActiveComponent: (component?: Component) => void;
@@ -44,13 +53,33 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 			props: {},
 			desc: "页面",
 		},
+		{
+			id: nanoid(10),
+			name: "Page",
+			props: {},
+			desc: "页面",
+		},
 	],
 	activeComponent: null,
 	hoverComponent: null,
 	activePosition: null,
 	hoverPosition: null,
+	addPage: () => {
+		set((state) => ({
+			components: [
+				...state.components,
+				{
+					id: nanoid(10),
+					name: "Page",
+					props: {},
+					desc: "页面",
+				},
+			],
+		}));
+	},
 	addComponent: (component) => {
 		set((state) => {
+			const newComp = { ...component, id: nanoid(10) };
 			const parentId = component.parentId;
 			if (parentId) {
 				// 获取到父级对象
@@ -58,18 +87,18 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 				if (parentComponent) {
 					// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 					parentComponent.children
-						? parentComponent.children.push(component)
-						: (parentComponent.children = [component]);
+						? parentComponent.children.push(newComp)
+						: (parentComponent.children = [newComp]);
 				}
 				// 给子对象添加父ID，方便查找
-				component.parentId = parentId;
+				newComp.parentId = parentId;
 				return {
 					components: [...state.components],
 				};
 			}
 			// 如果没有传parentId，则添加到顶层
 			return {
-				components: [...state.components, component],
+				components: [...state.components, newComp],
 			};
 		});
 	},
@@ -143,6 +172,58 @@ const useComponentStore = create<ComponentStore>((set, get) => ({
 	},
 	searchComponent: (id) => {
 		return getObjectById<Component>(get().components, id);
+	},
+	moveComponent: (componentId, newParentId, index) => {
+		const { searchComponent } = get();
+		const component = searchComponent(componentId);
+		if (!component) return;
+
+		// 1. 先从原位置移除组件
+		if (component.parentId) {
+			// 从父组件的children中移除
+			const parent = searchComponent(component.parentId);
+			if (parent?.children) {
+				parent.children = parent.children.filter((c) => c.id !== componentId);
+			}
+		} else {
+			// 从顶层移除
+			set((state) => ({
+				components: state.components.filter((c) => c.id !== componentId),
+			}));
+		}
+
+		// 2. 添加到新位置
+		component.parentId = newParentId;
+		if (newParentId) {
+			// 添加到指定父组件的children中
+			const newParent = searchComponent(newParentId);
+			if (newParent) {
+				if (!newParent.children) {
+					newParent.children = [];
+				}
+				if (index !== undefined && index >= 0) {
+					newParent.children.splice(index, 0, component);
+				} else {
+					newParent.children.push(component);
+				}
+			}
+		} else {
+			// 添加到顶层
+			set((state) => {
+				const newComponents = [...state.components];
+				if (index !== undefined && index >= 0) {
+					newComponents.splice(index, 0, component);
+				} else {
+					newComponents.push(component);
+				}
+				return { components: newComponents };
+			});
+		}
+
+		// 触发更新
+		set((state) => ({
+			components: [...state.components],
+		}));
 	},
 	setActiveComponent: (component) =>
 		set(() => ({

@@ -3,8 +3,7 @@ import EventEditor from "@/components/setting/event-editor";
 import JSONEditor from "@/components/setting/json-editor";
 import StyleEditor from "@/components/setting/style-editor";
 import useComponentStore from "@/stores/component";
-import { Segmented, Tabs } from "antd";
-import TabPane from "antd/es/tabs/TabPane";
+import { Segmented } from "antd";
 import React, { useState } from "react";
 
 type TabKey = "attr" | "style" | "event" | "json";
@@ -30,13 +29,16 @@ export default function Setting() {
 
 	return (
 		<div>
-			<Segmented
-				options={options}
-				value={key}
-				block
-				onChange={(value) => setKey(value as TabKey)}
-			/>
-			<div className="my-2 overflow-y-auto h-screen">
+			<div className="p-3">
+				<Segmented
+					options={options}
+					value={key}
+					block
+					onChange={(value) => setKey(value as TabKey)}
+				/>
+			</div>
+
+			<div className="px-3 pb-3 overflow-y-auto h-screen">
 				{key === "attr" && <AttrEditor />}
 				{key === "style" && <StyleEditor />}
 				{key === "event" && <EventEditor />}

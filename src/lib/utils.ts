@@ -95,3 +95,37 @@ export function parseCSS(cssCode: string): CSSProperties {
 
 	return styles;
 }
+
+// 处理表单值转换的工具函数
+export function processFormValue(value: unknown): string | number | null {
+	// 空值处理
+	if (value === null || value === undefined || value === "") {
+		return null;
+	}
+
+	// 基本类型直接返回
+	if (typeof value === "string" || typeof value === "number") {
+		return value;
+	}
+
+	// 颜色对象处理
+	if (value && typeof value === "object") {
+		const colorObj = value as Record<string, unknown>;
+		if (
+			"toHexString" in colorObj &&
+			typeof colorObj.toHexString === "function"
+		) {
+			return (colorObj.toHexString as () => string)();
+		}
+		if ("hex" in colorObj && typeof colorObj.hex === "string") {
+			return colorObj.hex;
+		}
+		// 其他对象转换为字符串
+		const stringValue = String(value);
+		return stringValue === "undefined" || stringValue === "null"
+			? null
+			: stringValue;
+	}
+
+	return null;
+}

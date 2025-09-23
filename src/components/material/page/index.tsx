@@ -10,9 +10,7 @@ export default function Page(props: PageProps) {
 	return (
 		<div
 			ref={dropRef}
-			className={`page h-full overflow-auto bg-white ${
-				isOver ? "border-1 border-blue-300" : "border-1 border-transparent"
-			}`}
+			className={`page shrink-0 h-full overflow-auto bg-white`}
 			{...props}
 		>
 			{props.children}

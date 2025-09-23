@@ -10,9 +10,7 @@ export default function Container(props: ContainerProps) {
 	return (
 		<div
 			ref={dropRef}
-			className={`container mx-auto p-4  ${
-				isOver ? "border-1 border-blue-300" : "border-1 border-black"
-			}`}
+			className={`container box-border`}
 			{...props}
 		>
 			{props.children}
