@@ -8,7 +8,7 @@ interface MaterialItemProps {
 export default function MaterialItem({ name }: MaterialItemProps) {
 	const elementRef = useRef<HTMLDivElement>(null);
 
-	const [_, dragRef] = useDrag(() => ({
+	const [, dragRef] = useDrag(() => ({
 		type: name,
 		item: {
 			type: name,

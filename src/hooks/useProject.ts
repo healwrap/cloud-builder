@@ -32,47 +32,53 @@ export function useProject() {
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, [message]);
 
 	/**
 	 * 创建新项目
 	 */
-	const createProject = useCallback(async (input: CreateProjectInput) => {
-		setCreating(true);
-		try {
-			const newProject = await ProjectDB.createProject(input);
-			setProjects((prev) => [newProject, ...prev]);
-			message.success("项目创建成功");
-			return newProject;
-		} catch (error) {
-			console.error("创建项目失败:", error);
-			message.error("创建项目失败");
-			return null;
-		} finally {
-			setCreating(false);
-		}
-	}, []);
+	const createProject = useCallback(
+		async (input: CreateProjectInput) => {
+			setCreating(true);
+			try {
+				const newProject = await ProjectDB.createProject(input);
+				setProjects((prev) => [newProject, ...prev]);
+				message.success("项目创建成功");
+				return newProject;
+			} catch (error) {
+				console.error("创建项目失败:", error);
+				message.error("创建项目失败");
+				return null;
+			} finally {
+				setCreating(false);
+			}
+		},
+		[message]
+	);
 
 	/**
 	 * 删除项目
 	 */
-	const deleteProject = useCallback(async (id: string) => {
-		try {
-			const success = await ProjectDB.deleteProject(id);
-			if (success) {
-				setProjects((prev) => prev.filter((p) => p.id !== id));
-				message.success("项目删除成功");
-				return true;
-			} else {
+	const deleteProject = useCallback(
+		async (id: string) => {
+			try {
+				const success = await ProjectDB.deleteProject(id);
+				if (success) {
+					setProjects((prev) => prev.filter((p) => p.id !== id));
+					message.success("项目删除成功");
+					return true;
+				} else {
+					message.error("删除项目失败");
+					return false;
+				}
+			} catch (error) {
+				console.error("删除项目失败:", error);
 				message.error("删除项目失败");
 				return false;
 			}
-		} catch (error) {
-			console.error("删除项目失败:", error);
-			message.error("删除项目失败");
-			return false;
-		}
-	}, []);
+		},
+		[message]
+	);
 
 	/**
 	 * 更新项目
@@ -95,7 +101,7 @@ export function useProject() {
 				return false;
 			}
 		},
-		[loadProjects]
+		[loadProjects, message]
 	);
 
 	/**
@@ -145,7 +151,7 @@ export function useProject() {
 				setLoading(false);
 			}
 		},
-		[loadProjects]
+		[loadProjects, message]
 	);
 
 	/**
@@ -201,21 +207,24 @@ export function useProjectData(projectId?: string) {
 	/**
 	 * 加载项目数据
 	 */
-	const loadProject = useCallback(async (id: string) => {
-		setLoading(true);
-		try {
-			const projectData = await ProjectDB.getProjectById(id);
-			setProject(projectData || null);
-			if (!projectData) {
-				message.error("项目不存在");
+	const loadProject = useCallback(
+		async (id: string) => {
+			setLoading(true);
+			try {
+				const projectData = await ProjectDB.getProjectById(id);
+				setProject(projectData || null);
+				if (!projectData) {
+					message.error("项目不存在");
+				}
+			} catch (error) {
+				console.error("加载项目失败:", error);
+				message.error("加载项目失败");
+			} finally {
+				setLoading(false);
 			}
-		} catch (error) {
-			console.error("加载项目失败:", error);
-			message.error("加载项目失败");
-		} finally {
-			setLoading(false);
-		}
-	}, []);
+		},
+		[message]
+	);
 
 	/**
 	 * 保存项目组件数据
@@ -248,7 +257,7 @@ export function useProjectData(projectId?: string) {
 				setSaving(false);
 			}
 		},
-		[project?.id]
+		[project?.id, message]
 	);
 
 	/**

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { Allotment } from "allotment";
 import { useUser } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
@@ -14,7 +14,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { useProjectData } from "@/hooks/useProject";
 import useComponentStore from "@/stores/component";
 
-export default function EditorPage() {
+function EditorContent() {
 	const { isLoaded } = useUser();
 	const searchParams = useSearchParams();
 	const projectId = searchParams.get("projectId");
@@ -66,5 +66,13 @@ export default function EditorPage() {
 				</Allotment>
 			</DndProvider>
 		</div>
+	);
+}
+
+export default function EditorPage() {
+	return (
+		<Suspense fallback={<Loading />}>
+			<EditorContent />
+		</Suspense>
 	);
 }

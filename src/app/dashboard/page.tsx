@@ -4,23 +4,18 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { Logo } from "@/components/ui/logo";
 import { useProject } from "@/hooks/useProject";
 import { useState } from "react";
+import Image from "next/image";
 import {
 	Button,
 	Modal,
 	Input,
-	Card,
 	Popconfirm,
 	Space,
 	Typography,
 	Empty,
 	Spin,
 } from "antd";
-import {
-	PlusOutlined,
-	EditOutlined,
-	DeleteOutlined,
-	EyeOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
 
@@ -76,9 +71,10 @@ function ProjectCard({
 				onClick={onEdit}
 			>
 				{project.thumbnail ? (
-					<img
+					<Image
 						src={project.thumbnail}
 						alt={project.name}
+						fill
 						className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 					/>
 				) : (

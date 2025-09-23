@@ -7,13 +7,8 @@ import { useDrop } from "react-dnd";
 
 export default function useMaterialDrop() {
 	const { componentConfig } = useComponentConfigStore();
-	const {
-		components,
-		addComponent,
-		searchComponent,
-		setHoverComponent,
-		setHoverPosition,
-	} = useComponentStore();
+	const { addComponent, searchComponent, setHoverComponent, setHoverPosition } =
+		useComponentStore();
 	const dropRef = useRef<HTMLDivElement>(null);
 	const [{ isOver }, drop] = useDrop(() => ({
 		accept: Object.keys(componentConfig) as ComponentName[],

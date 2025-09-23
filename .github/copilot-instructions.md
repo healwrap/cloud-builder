@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-这是一个基于 Next.js 15 的低代码可视化页面构建平台，使用拖拽方式创建组件树并实时预览。
+这是一个基于 Next.js 15 的低代码可视化页面构建平台，使用拖拽方式创建组件树并实时预览。使用 Clerk 身份验证，IndexedDB 本地存储，React DnD 拖拽系统。
 
 ## 核心架构模式
 
@@ -11,6 +11,7 @@
 - **Component Store** (`src/stores/component.ts`): 存储组件树 JSON 结构，管理层级关系和属性
 - **ComponentConfig Store** (`src/stores/component-config.ts`): 存储组件类型映射、默认属性和 Setter 配置
 - 组件通过 `data-component-id` 属性连接 DOM 与存储，实现点击选中和 hover 效果
+- 使用 Zustand 进行状态管理，避免 Redux 复杂性
 
 ### Material 组件开发模式
 
@@ -20,6 +21,7 @@ export interface ButtonProps {
   type: AntdButtonProps["type"];
   text: string;
 }
+// 组件必须接受 data-component-id 和 style props
 
 // 2. 创建setter配置 (src/lib/*-setter.ts)
 const ButtonSetter = [
@@ -33,15 +35,24 @@ const ButtonSetter = [
   component: Button,
   hasChildren: false,  // 是否可嵌套子组件
   setter: ButtonSetter,
-  styleSetter: ButtonStyleSetter
+  styleSetter: ButtonStyleSetter,
+  defaultProps: {},    // 默认属性
+  defaultStyles: {}    // 默认样式
 }
 ```
 
 ### 拖拽系统架构
 
-- 使用 `react-dnd` + `HTML5Backend`
+- 使用 `react-dnd` + `HTML5Backend`，配置在 EditorPage 顶层
 - `useMaterialDrop` hook 处理组件放置逻辑，自动寻找最近的可容纳父组件
 - 支持嵌套拖拽，通过 `hasChildren` 配置控制可容纳性
+- 拖拽 hover 时通过 DOM 递归查找符合条件的父组件
+
+### 数据持久化模式
+
+- 使用 IndexedDB + Dexie.js 进行本地存储 (`src/lib/indexedDB.ts`)
+- `useProject` hook 管理项目 CRUD 操作和状态同步
+- 项目数据包含组件树 JSON，通过 `useProjectData` 与编辑器状态同步
 
 ## 关键开发流程
 
@@ -69,6 +80,13 @@ EditorPage (DndProvider)
 │   ├── Canvas (中央画布) + ActiveMask + HoverMask
 │   └── Setting (右侧属性编辑器)
 ```
+
+### 组件渲染机制
+
+- Canvas 使用 `renderComponent` 函数递归渲染 JSON 树
+- 通过 `React.createElement` 动态创建组件实例
+- 样式合并: `defaultStyles` + 组件 `styles` 属性
+- 所有 Material 组件必须接受 `data-component-id` 和 `style` props
 
 ## 技术栈约定
 
