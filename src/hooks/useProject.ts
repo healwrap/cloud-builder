@@ -4,7 +4,7 @@ import {
 	CreateProjectInput,
 	UpdateProjectInput,
 } from "@/types/project";
-import ProjectDB from "@/lib/indexedDB";
+import ProjectDB from "@/db/project";
 import { useRouter } from "next/navigation";
 import { App } from "antd";
 
