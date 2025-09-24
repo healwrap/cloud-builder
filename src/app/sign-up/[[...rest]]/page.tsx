@@ -1,29 +1,21 @@
 import { SignUp } from "@clerk/nextjs";
 
 export default function SignUpPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-md">
-        <SignUp 
-          fallbackRedirectUrl="/dashboard"
-          appearance={{
-            elements: {
-              formButtonPrimary: 
-                "bg-white text-black hover:bg-gray-100 text-sm normal-case",
-              card: "bg-gray-900 border border-gray-700",
-              headerTitle: "text-white",
-              headerSubtitle: "text-gray-300",
-              socialButtonsBlockButton: "border-gray-600 text-white hover:bg-gray-800",
-              socialButtonsBlockButtonText: "text-white",
-              formFieldLabel: "text-gray-300",
-              formFieldInput: "bg-gray-800 border-gray-600 text-white",
-              footerActionLink: "text-white hover:text-gray-300",
-              identityPreviewText: "text-white",
-              identityPreviewEditButton: "text-white",
-            },
-          }}
-        />
-      </div>
-    </div>
-  );
+	return (
+		<div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+			<div className="w-full max-w-md">
+				<SignUp
+					appearance={{
+						elements: {
+							formButtonPrimary:
+								"bg-blue-500 hover:bg-blue-600 text-sm normal-case",
+							card: "rounded-xl shadow-md",
+							headerTitle: "text-xl font-bold text-gray-800",
+							headerSubtitle: "text-gray-500",
+						},
+					}}
+				/>
+			</div>
+		</div>
+	);
 }

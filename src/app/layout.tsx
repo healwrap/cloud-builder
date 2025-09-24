@@ -3,7 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { App } from "antd";
 import "./globals.css";
-import "allotment/dist/style.css"
+import "allotment/dist/style.css";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -26,18 +26,14 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<ClerkProvider 
+		<ClerkProvider
 			publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-			signInFallbackRedirectUrl="/dashboard"
-			signUpFallbackRedirectUrl="/dashboard"
 		>
 			<html lang="zh-CN">
 				<body
 					className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 				>
-					<App>
-						{children}
-					</App>
+					<App>{children}</App>
 				</body>
 			</html>
 		</ClerkProvider>

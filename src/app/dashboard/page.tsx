@@ -109,7 +109,7 @@ function ProjectCard({
 								type="text"
 								size="small"
 								icon={<DeleteOutlined />}
-								className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all duration-200"
+								className="text-gray-400 hover:text-red-500"
 								danger
 								onClick={(e) => e.stopPropagation()}
 							/>

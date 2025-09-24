@@ -24,7 +24,7 @@ const HeroContent: React.FC<HeroContentProps> = ({
 			</p>
 
 			<div className="mt-10 flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
-				<Link href="/sign-up">
+				<Link href="/dashboard">
 					<button className="h-12 rounded-full bg-white px-8 text-base font-medium text-black hover:bg-white/90">
 						免费开始使用
 					</button>
